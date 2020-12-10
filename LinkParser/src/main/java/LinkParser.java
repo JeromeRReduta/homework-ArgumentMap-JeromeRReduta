@@ -50,19 +50,39 @@ public class LinkParser {
 		/*
 		 * TODO A starter template is given below, but you do not have to use it.
 		 */
-		String regex = ".+"; // TODO Fill in your regex here
+		String anyChar = "(.*?|\\r\\n|\n)*";
+		String regex = "(?i)<a" + anyChar + ">";
+		//String regex = "(?i)<a" + anyChar + "href" + anyChar + "=" + anyChar + '"' + anyChar + '"'; // TODO Fill in your regex here
 		Pattern pattern = Pattern.compile(regex);
 		Matcher matcher = pattern.matcher(html);
+		ArrayList<URL> validLinks = new ArrayList<>();
+		
 
 		while (matcher.find()) {
 			// TODO Fill in your code here. 
 			// TODO You may want to use different groups depending on your regex!
 			// TODO Don't forget to use the normalize(...) method!
 			String matched = matcher.group();
-			System.out.println(matched);
+			//System.out.println(matched);
+			
+			try {
+				
+				Matcher match = Pattern.compile("(?i)href.*?=.*?\".*?\"").matcher(matched.replaceAll("(\\n)*", ""));
+				
+				if (match.find()) {
+					URL normalized = normalize(new URL(base, match.group()
+							.replaceAll("(?i)href.*?=", "")
+							.replaceAll(Character.toString('"'),"")));
+					
+					validLinks.add(normalized);
+				}
+			}
+			catch (Exception e) {
+				continue;
+			}
 		}
 		
-		return null;
+		return validLinks;
 	}
 	
 	/**
